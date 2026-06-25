@@ -7,9 +7,6 @@ namespace loseva {
 
 bool parseArgs(const int argc, char** argv, std::string& inFile, std::string& outFile)
 {
-  if (argc > 3) {
-    return false;
-  }
   bool inFound = false;
   bool outFound = false;
   for (int i = 1; i < argc; ++i) {
@@ -39,7 +36,8 @@ int main(const int argc, char** argv)
 {
   std::string inFile = "";
   std::string outFile = "";
-  if (!loseva::parseArgs(argc, argv, inFile, outFile)) {
+  if (!loseva::parseArgs(argc, argv, inFile, outFile) || argc > 3) {
+    std::cerr << "Invalid arguments\n";
     return 1;
   }
   std::istream* in = &std::cin;
@@ -57,27 +55,55 @@ int main(const int argc, char** argv)
   loseva::init(persons);
   std::size_t successCount = 0;
   std::size_t ignoredCount = 0;
-  std::size_t id = 0;
-  while (*in >> id) {
-    std::string info = "";
-    std::getline(*in, info);
-    const std::size_t start = info.find_first_not_of(" \t");
-    info = (start != std::string::npos) ? info.substr(start) : "";
-    if (info.empty() || loseva::has_person(persons, id)) {
-      ignoredCount++;
-    } else {
-      loseva::Person p;
-      p.id = id;
-      p.info = info;
-      loseva::push_back(persons, p);
-      successCount++;
+  std::string line = "";
+  while (std::getline(*in, line)) {
+    const std::size_t first_non_space = line.find_first_not_of(" \t\r\n");
+    if (first_non_space == std::string::npos) {
+      continue;
     }
-  }
-  if (in->fail() && !in->eof()) {
-    in->clear();
-    std::string dummy = "";
-    std::getline(*in, dummy);
-    ignoredCount++;
+    const std::size_t id_end = line.find_first_of(" \t", first_non_space);
+    std::string id_str = "";
+    std::string info_str = "";
+    if (id_end == std::string::npos) {
+      id_str = line.substr(first_non_space);
+    } else {
+      id_str = line.substr(first_non_space, id_end - first_non_space);
+      info_str = line.substr(id_end);
+    }
+    bool is_num = true;
+    if (id_str.empty()) {
+      is_num = false;
+    } else {
+      for (std::size_t i = 0; i < id_str.size(); ++i) {
+        if (id_str[i] < '0' || id_str[i] > '9') {
+          is_num = false;
+          break;
+        }
+      }
+    }
+    if (!is_num) {
+      ignoredCount++;
+      continue;
+    }
+    std::size_t id = 0;
+    for (std::size_t i = 0; i < id_str.size(); ++i) {
+      id = id * 10 + (id_str[i] - '0');
+    }
+    const std::size_t info_start = info_str.find_first_not_of(" \t");
+    if (info_start == std::string::npos) {
+      ignoredCount++;
+      continue;
+    }
+    info_str = info_str.substr(info_start);
+    if (loseva::has_person(persons, id)) {
+      ignoredCount++;
+      continue;
+    }
+    loseva::Person p;
+    p.id = id;
+    p.info = info_str;
+    loseva::push_back(persons, p);
+    successCount++;
   }
   if (!outFile.empty()) {
     fout.open(outFile);
