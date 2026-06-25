@@ -7,14 +7,14 @@
 namespace loseva {
 
 template< typename T >
-struct Array_t {
+struct Array {
   T* data = nullptr;
   std::size_t size = 0;
   std::size_t capacity = 0;
 };
 
 template< typename T >
-void init(Array_t< T >& arr)
+void init(Array< T >& arr)
 {
   arr.data = nullptr;
   arr.size = 0;
@@ -22,14 +22,14 @@ void init(Array_t< T >& arr)
 }
 
 template< typename T >
-void destroy(Array_t< T >& arr)
+void destroy(Array< T >& arr)
 {
   delete[] arr.data;
   loseva::init(arr);
 }
 
 template< typename T >
-void push_back(Array_t< T >& arr, const T& val)
+void push_back(Array< T >& arr, const T& val)
 {
   if (arr.size == arr.capacity) {
     const std::size_t new_cap = (arr.capacity == 0) ? 1 : arr.capacity * 2;
@@ -44,48 +44,48 @@ void push_back(Array_t< T >& arr, const T& val)
   arr.data[arr.size++] = val;
 }
 
-struct Person_t {
+struct Person {
   std::size_t id = 0;
   std::string info = "";
 };
 
-struct Meet_t {
+struct Meet {
   std::size_t id1 = 0;
   std::size_t id2 = 0;
   int time = 0;
 };
 
-struct Date_t {
+struct Date {
   int d = 0;
   int m = 0;
   int y = 0;
 };
 
-struct MeetWithDate_t {
-  Meet_t meet;
-  Date_t date;
+struct MeetWithDate {
+  Meet meet;
+  Date date;
 };
 
-struct Period_t {
-  Date_t start;
-  Date_t end;
+struct Period {
+  Date start;
+  Date end;
   bool is_empty = true;
 };
 
-struct RangeStack_t {
-  Period_t* data = nullptr;
+struct RangeStack {
+  Period* data = nullptr;
   std::size_t size = 0;
   std::size_t capacity = 0;
 };
 
-void init(RangeStack_t& st)
+void init(RangeStack& st)
 {
   st.data = nullptr;
   st.size = 0;
   st.capacity = 0;
 }
 
-void destroy(RangeStack_t& st)
+void destroy(RangeStack& st)
 {
   delete[] st.data;
   st.data = nullptr;
@@ -93,11 +93,11 @@ void destroy(RangeStack_t& st)
   st.capacity = 0;
 }
 
-void push(RangeStack_t& st, const Period_t& val)
+void push(RangeStack& st, const Period& val)
 {
   if (st.size == st.capacity) {
     const std::size_t new_cap = (st.capacity == 0) ? 1 : st.capacity * 2;
-    Period_t* new_data = new Period_t[new_cap];
+    Period* new_data = new Period[new_cap];
     for (std::size_t i = 0; i < st.size; ++i) {
       new_data[i] = st.data[i];
     }
@@ -108,14 +108,14 @@ void push(RangeStack_t& st, const Period_t& val)
   st.data[st.size++] = val;
 }
 
-void pop(RangeStack_t& st)
+void pop(RangeStack& st)
 {
   if (st.size > 0) {
     st.size--;
   }
 }
 
-bool has_person(const Array_t< Person_t >& arr, const std::size_t id)
+bool has_person(const Array< Person >& arr, const std::size_t id)
 {
   for (std::size_t i = 0; i < arr.size; ++i) {
     if (arr.data[i].id == id) {
@@ -125,7 +125,7 @@ bool has_person(const Array_t< Person_t >& arr, const std::size_t id)
   return false;
 }
 
-int compare_dates(const Date_t& a, const Date_t& b)
+int compare_dates(const Date& a, const Date& b)
 {
   if (a.y != b.y) {
     return (a.y < b.y) ? -1 : 1;
